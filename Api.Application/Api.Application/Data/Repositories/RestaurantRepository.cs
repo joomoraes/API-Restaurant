@@ -4,7 +4,12 @@ namespace Api.Application.Data.Repositories
 
     using Api.Application.Data.Schemas;
     using Api.Application.Domain.Entities;
+    using Api.Application.Domain.Enums;
+    using Api.Application.Domain.ValueObjects;
     using global::MongoDB.Driver;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     public class RestaurantRepository 
     {
@@ -32,6 +37,26 @@ namespace Api.Application.Data.Repositories
             };
 
             _restaurants.InsertOne(document);
+        }
+
+        public async Task<IEnumerable<Restaurant>> GetAll()
+        {
+            var restaurant = new List<Restaurant>();
+
+            await _restaurants.AsQueryable().ForEachAsync(d =>
+            {
+                var r = new Restaurant(d.Id.ToString(), d.Name, d.Kitchen);
+                var e = new Address(d.Address.PublicPlace,
+                    d.Address.Number,
+                    d.Address.City,
+                    d.Address.State,
+                    d.Address.ZipCode);
+                r.AtributeAddress(e);
+
+                restaurant.Add(r);
+            });
+
+            return restaurant;
         }
     }
 }

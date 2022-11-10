@@ -2,12 +2,14 @@
 namespace Api.Application.Controllers
 {
     using Api.Application.Controllers.Inputs;
+    using Api.Application.Controllers.Outputs;
     using Api.Application.Data.Repositories;
     using Api.Application.Domain.Entities;
     using Api.Application.Domain.Enums;
     using Api.Application.Domain.ValueObjects;
     using Microsoft.AspNetCore.Mvc;
     using System.Linq;
+    using System.Threading.Tasks;
 
     [ApiController]
     public class RestaurantController : Controller
@@ -55,6 +57,26 @@ namespace Api.Application.Controllers
                         data = "Successful! Insert new restaurant"
                     }
                 );
+        }
+
+        [HttpGet("restaurant/all")]
+        public async Task<ActionResult> GetAllRestaurants()
+        {
+            var restaurants = await _restaurantRepository.GetAll();
+
+            var list = restaurants.Select(_ => new RestaurantList
+            {
+                Id = _.Id,
+                Name = _.Name,
+                Kitchen = (int)_.Kitchen,
+                City = _.Address.City
+            });
+
+            return Ok(
+                new
+                {
+                    data = list
+                });
         }
     }
 }
