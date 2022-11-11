@@ -78,5 +78,35 @@ namespace Api.Application.Controllers
                     data = list
                 });
         }
+
+        [HttpGet("restaurant/{id}")]
+        public ActionResult GetRestaurantById(string id)
+        {
+            var restaurant = _restaurantRepository.GetById(id);
+
+            if (restaurant == null)
+                return NotFound();
+
+            var view = new RestaurantView
+            {
+                Id = restaurant.Id,
+                Name = restaurant.Name,
+                Kitchen = (int)restaurant.Kitchen,
+                Address = new AddressView
+                {
+                    PublicPlace = restaurant.Address.Publicplace,
+                    Number = restaurant.Address.Number,
+                    City = restaurant.Address.City,
+                    State = restaurant.Address.State,
+                    ZipCode = restaurant.Address.ZipCode
+                }
+            };
+
+            return Ok(
+                new
+                {
+                    data = view
+                });
+        }
     }
 }
