@@ -10,6 +10,7 @@ namespace Api.Application.Data.Repositories
     using System.Collections;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using System.Linq;
 
     public class RestaurantRepository 
     {
@@ -57,6 +58,16 @@ namespace Api.Application.Data.Repositories
             });
 
             return restaurant;
+        }
+
+        public Restaurant GetById(string id)
+        {
+            var document = _restaurants.AsQueryable().FirstOrDefault(_ => _.Id == id);
+
+            if (document == null)
+                return null;
+
+            return document.ParseToDomain();
         }
     }
 }
