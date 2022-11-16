@@ -101,5 +101,17 @@ namespace Api.Application.Data.Repositories
             return result.ModifiedCount > 0;
         }
 
+        public IEnumerable<Restaurant> GetByName(string name)
+        {
+            var restaurant = new List<Restaurant>();
+
+            _restaurants.AsQueryable()
+                .Where(_ => _.Name.ToLower().Contains(name.ToLower()))
+                .ToList()
+                .ForEach(d => restaurant.Add(d.ParseToDomain()));
+
+            return restaurant;
+        }
+
     }
 }

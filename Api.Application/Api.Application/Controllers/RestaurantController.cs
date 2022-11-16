@@ -8,6 +8,9 @@ namespace Api.Application.Controllers
     using Api.Application.Domain.Enums;
     using Api.Application.Domain.ValueObjects;
     using Microsoft.AspNetCore.Mvc;
+    using MongoDB.Bson;
+    using System.Collections;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -174,6 +177,25 @@ namespace Api.Application.Controllers
             return Ok(new
             {
                 data = "Kitchen was update successful"
+            });
+        }
+
+        [HttpGet("restaurant")]
+        public ActionResult GetByName([FromQuery] string name)
+        {
+            var restaurant = _restaurantRepository.GetByName(name);
+
+            var list = restaurant.Select(_ => new RestaurantList
+            {
+                Id = _.Id,
+                Name = _.Name,
+                Kitchen = (int) _.Kitchen,
+                City = _.Address.City
+            });
+
+            return Ok(new
+            {
+                data = list
             });
         }
     }
