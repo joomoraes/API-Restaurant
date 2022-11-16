@@ -69,5 +69,37 @@ namespace Api.Application.Data.Repositories
 
             return document.ParseToDomain();
         }
+
+        public bool UpdateComplet(Restaurant restaurant)
+        {
+            var document = new RestaurantSchema
+            {
+                Id = restaurant.Id,
+                Name = restaurant.Name,
+                Kitchen = restaurant.Kitchen,
+                Address = new AddressSchema
+                {
+                    PublicPlace = restaurant.Address.Publicplace,
+                    Number = restaurant.Address.Number,
+                    City = restaurant.Address.City,
+                    ZipCode = restaurant.Address.ZipCode,
+                    State = restaurant.Address.State
+                }
+            };
+
+            var result = _restaurants.ReplaceOne(_ => _.Id == document.Id, document);
+
+            return result.ModifiedCount > 0;
+        }
+
+        public bool UpdateKitchen(string id, EKitchen kitchen)
+        {
+            var update = Builders<RestaurantSchema>.Update.Set(_ => _.Kitchen, kitchen);
+
+            var result = _restaurants.UpdateOne(_ => _.Id == id, update);
+
+            return result.ModifiedCount > 0;
+        }
+
     }
 }
