@@ -108,5 +108,73 @@ namespace Api.Application.Controllers
                     data = view
                 });
         }
+
+        [HttpPut("restaurant")]
+        public ActionResult UpdateRestaurant([FromBody] RestaurantUpdateComplet restaurantUpdateComplet)
+        {
+            var restaurant = _restaurantRepository.GetById(restaurantUpdateComplet.Id);
+
+            if (restaurant == null)
+                return NotFound();
+
+            var kitchen = EKitchenHelper.ParseInt(restaurantUpdateComplet.Kitchen);
+            restaurant = new Restaurant(restaurantUpdateComplet.Id, restaurantUpdateComplet.Name, kitchen);
+            var address = new Address(
+                restaurantUpdateComplet.Publicplace,
+                restaurantUpdateComplet.Number,
+                restaurantUpdateComplet.City,
+                restaurantUpdateComplet.State,
+                restaurantUpdateComplet.ZipCode);
+
+            restaurant.AtributeAddress(address);
+
+            if(!restaurant._Validate())
+            {
+                return BadRequest(
+                    new
+                    {
+                        errors = restaurant.ValidationResult.Errors.Select(_ => _.ErrorMessage)
+                    }); ;
+            }
+
+            if(!_restaurantRepository.UpdateComplet(restaurant))
+            {
+                return BadRequest(
+                    new
+                    {
+                        data = "None documents was update!"
+                    });
+            }
+
+            return Ok(
+                new
+                {
+                    data = "Restaurant was update successful"
+                });
+        }
+
+        [HttpPatch("restaurant/{id}")]
+        public ActionResult UpdateKitchen(string id, [FromBody] RestaurantUpdateParcial restaurantUpdateParcial)
+        {
+            var restaurant = _restaurantRepository.GetById(id);
+
+            if (restaurant == null)
+                return NotFound();
+
+            var kitchen = EKitchenHelper.ParseInt(restaurantUpdateParcial.Kitchen);
+
+            if (!_restaurantRepository.UpdateKitchen(id, kitchen))
+            {
+                return BadRequest(new
+                {
+                    errors = "None documento was update"
+                });
+            }
+
+            return Ok(new
+            {
+                data = "Kitchen was update successful"
+            });
+        }
     }
 }
