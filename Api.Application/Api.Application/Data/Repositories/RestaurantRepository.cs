@@ -15,10 +15,12 @@ namespace Api.Application.Data.Repositories
     public class RestaurantRepository 
     {
         IMongoCollection<RestaurantSchema> _restaurants;
+        IMongoCollection<ReviewSchema> _review;
 
         public RestaurantRepository(MongoDB mongoDB)
         {
             _restaurants = mongoDB.DB.GetCollection<RestaurantSchema>("restaurant");
+            _review = mongoDB.DB.GetCollection<ReviewSchema>("review");
         }
 
         public void Insert(Restaurant restaurant)
@@ -111,6 +113,17 @@ namespace Api.Application.Data.Repositories
                 .ForEach(d => restaurant.Add(d.ParseToDomain()));
 
             return restaurant;
+        }
+        public void Review(string restaurantId, Review review)
+        {
+            var document = new ReviewSchema
+            {
+                RestaurantId = restaurantId,
+                Starts = review.Starts,
+                Comments = review.Comments
+            };
+
+            _review.InsertOne(document);
         }
 
     }
