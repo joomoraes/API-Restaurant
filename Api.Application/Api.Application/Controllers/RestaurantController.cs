@@ -198,5 +198,33 @@ namespace Api.Application.Controllers
                 data = list
             });
         }
+
+        [HttpPatch("restaurant/{id}/review")]
+        public ActionResult ReviewRestaurant(string id, [FromBody] ReviewInclud reviewInclud)
+        {
+            var restaurant = _restaurantRepository.GetById(id);
+
+            if (restaurant == null)
+                return NotFound();
+
+            var review = new Review(reviewInclud.Stars, reviewInclud.Comments);
+
+            if(!review._Validate())
+            {
+                return BadRequest(new
+                {
+                    errors = review.ValidationResult.Errors.Select(_ => _.ErrorMessage)
+                }); 
+            }
+
+            _restaurantRepository.Review(id, review);
+
+            return Ok(
+                new { 
+                        data = "Restaurant review with success"
+                    }
+                );
+        }
+
     }
 }
