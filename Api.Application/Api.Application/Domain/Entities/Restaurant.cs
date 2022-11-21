@@ -5,6 +5,7 @@
     using Api.Application.Domain.ValueObjects;
     using FluentValidation;
     using FluentValidation.Results;
+    using System.Collections.Generic;
 
     public class Restaurant : AbstractValidator<Restaurant>
     {
@@ -13,6 +14,7 @@
         {
             Name = _Name;
             Kitchen = _Kitchen;
+            Review = new List<Review>();
         }
 
         public Restaurant(string _Id, string _Name, EKitchen _Kitchen)
@@ -20,18 +22,24 @@
             Id = _Id;
             Name = _Name;
             Kitchen = _Kitchen;
+            Review = new List<Review>();
         }
 
         public string Id { get; private set; }
         public string Name { get; private set; } 
         public EKitchen Kitchen { get; private set; }
         public  Address Address { get; private set; }
-
+        public List<Review> Review { get; private set; }
         public ValidationResult ValidationResult { get; set; }
 
         public void AtributeAddress(Address address)
         {
             Address = address;
+        }
+
+        public void ReviewInsert(Review review)
+        {
+            Review.Add(review);
         }
 
         public virtual bool _Validate()
