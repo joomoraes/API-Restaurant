@@ -126,5 +126,33 @@ namespace Api.Application.Data.Repositories
             _review.InsertOne(document);
         }
 
+        public async Task<Dictionary<Restaurant, double>> GetTop3()
+        {
+            var ret = new Dictionary<Restaurant, double>();
+
+            var top3 = _review.Aggregate()
+                .Group(_ => _.RestaurantId, g => new
+                {
+                    RestaurantId = g.Key, 
+                    AverageStars = g.Average(a => a.Starts)
+                })
+                .SortByDescending(_ => _.AverageStars)
+                .Limit(3);
+
+            await top3.ForEachAsync(_ =>
+            {
+                var restaurant = GetById(_.RestaurantId);
+
+                _review.AsQueryable()
+                .Where(a => a.RestaurantId == _.RestaurantId)
+                .ToList()
+                .ForEach(a => restaurant.ReviewInsert(a.ParseToDomain()));
+
+                ret.Add(restaurant, _.AverageStars);
+            });
+
+            return ret;
+        }
+
     }
 }

@@ -11,6 +11,7 @@ namespace Api.Application.Controllers
     using MongoDB.Bson;
     using System.Collections;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -226,5 +227,24 @@ namespace Api.Application.Controllers
                 );
         }
 
+        [HttpGet("restaurant/top3")]
+        public async Task<ActionResult> GetTop3Restaurant()
+        {
+            var top3 = await _restaurantRepository.GetTop3();
+
+            var list = top3.Select(_ => new RestaurantTop3
+            {
+                Id = _.Key.Id,
+                Name = _.Key.Name,
+                Kitchen = (int)_.Key.Kitchen,
+                City = _.Key.Address.City,
+                Stars = (int)_.Value
+            });
+
+            return Ok(new
+            {
+                data = list
+            });
+        }
     }
 }

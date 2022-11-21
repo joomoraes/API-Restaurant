@@ -2,6 +2,7 @@
 
 namespace Api.Application.Data.Schemas
 {
+    using Api.Application.Domain.ValueObjects;
     using global::MongoDB.Bson;
     using global::MongoDB.Bson.Serialization.Attributes;
 
@@ -14,5 +15,14 @@ namespace Api.Application.Data.Schemas
         public string RestaurantId { get; set; }
         public int Starts { get; set; }
         public string Comments { get; set; }
+
+    }
+
+    public static class ReviewSchemaExtension
+    {
+        public static Review ParseToDomain(this ReviewSchema document)
+        {
+            return new Review(document.Starts, document.Comments);
+        }
     }
 }
