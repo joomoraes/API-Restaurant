@@ -2,9 +2,7 @@
 
 C# library project template
 
-[![super linter][super-linter-img]][super-linter-url]
-[![test][test-img]][test-url]
-[![semantic][semantic-img]][semantic-url]
+
 <p align="center">
   <img alt="GitHub language count" src="https://img.shields.io/github/languages/count/joomoraes/API-Restaurant">
 
