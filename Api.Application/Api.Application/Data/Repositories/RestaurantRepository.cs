@@ -154,5 +154,13 @@ namespace Api.Application.Data.Repositories
             return ret;
         }
 
+        public (long, long) Remove(string restaurantId)
+        {
+            var resultReviews = _review.DeleteMany(_ => _.RestaurantId == restaurantId);
+            var resultRestaurant = _restaurants.DeleteOne(_ => _.Id == restaurantId);
+
+            return (resultRestaurant.DeletedCount, resultReviews.DeletedCount);
+        }
+
     }
 }
