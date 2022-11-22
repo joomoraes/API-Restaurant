@@ -11,6 +11,7 @@ namespace Api.Application.Data.Repositories
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using System.Linq;
+    using global::MongoDB.Driver.Linq;
 
     public class RestaurantRepository 
     {
@@ -160,6 +161,20 @@ namespace Api.Application.Data.Repositories
             var resultRestaurant = _restaurants.DeleteOne(_ => _.Id == restaurantId);
 
             return (resultRestaurant.DeletedCount, resultReviews.DeletedCount);
+        }
+
+        public async Task<IEnumerable<Restaurant>> GetSearchText(string name)
+        {
+            var restaurant = new List<Restaurant>();
+
+            var filter = Builders<RestaurantSchema>.Filter.Text(name);
+
+            await _restaurants
+                .AsQueryable()
+                .Where(_ => filter.Inject())
+                .ForEachAsync(d => restaurant.Add(d.ParseToDomain()));
+
+            return restaurant;
         }
 
     }

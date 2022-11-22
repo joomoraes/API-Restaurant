@@ -8,6 +8,7 @@ namespace Api.Application.Controllers
     using Api.Application.Domain.Enums;
     using Api.Application.Domain.ValueObjects;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Routing;
     using MongoDB.Bson;
     using System.Collections;
     using System.Collections.Generic;
@@ -44,7 +45,7 @@ namespace Api.Application.Controllers
 
             restaurant.AtributeAddress(address);
 
-            if(!restaurant._Validate())
+            if (!restaurant._Validate())
             {
                 return BadRequest(
                     new
@@ -132,7 +133,7 @@ namespace Api.Application.Controllers
 
             restaurant.AtributeAddress(address);
 
-            if(!restaurant._Validate())
+            if (!restaurant._Validate())
             {
                 return BadRequest(
                     new
@@ -141,7 +142,7 @@ namespace Api.Application.Controllers
                     }); ;
             }
 
-            if(!_restaurantRepository.UpdateComplet(restaurant))
+            if (!_restaurantRepository.UpdateComplet(restaurant))
             {
                 return BadRequest(
                     new
@@ -190,7 +191,7 @@ namespace Api.Application.Controllers
             {
                 Id = _.Id,
                 Name = _.Name,
-                Kitchen = (int) _.Kitchen,
+                Kitchen = (int)_.Kitchen,
                 City = _.Address.City
             });
 
@@ -210,20 +211,20 @@ namespace Api.Application.Controllers
 
             var review = new Review(reviewInclud.Stars, reviewInclud.Comments);
 
-            if(!review._Validate())
+            if (!review._Validate())
             {
                 return BadRequest(new
                 {
                     errors = review.ValidationResult.Errors.Select(_ => _.ErrorMessage)
-                }); 
+                });
             }
 
             _restaurantRepository.Review(id, review);
 
             return Ok(
-                new { 
-                        data = "Restaurant review with success"
-                    }
+                new {
+                    data = "Restaurant review with success"
+                }
                 );
         }
 
@@ -259,8 +260,29 @@ namespace Api.Application.Controllers
 
             return Ok(new
             {
-                data = $"total of exclude: {resultRestaurantRemoved} restaurant with {resultReviewRemoved} reviews" 
+                data = $"total of exclude: {resultRestaurantRemoved} restaurant with {resultReviewRemoved} reviews"
             });
+        }
+
+        [HttpGet("restaurant/text")]
+        public async Task<ActionResult> GetRestaurantByText([FromQuery] string text)
+        {
+            var restaurant = await _restaurantRepository.GetSearchText(text);
+
+            var list = restaurant.ToList().Select(_ => new RestaurantList 
+            {
+                Id = _.Id,
+                Name = _.Name,
+                Kitchen = (int)_.Kitchen,
+                City = _.Address.City
+            });
+
+            return Ok(
+                new
+                {
+                    data = list
+                }); 
+
         }
     }
 }
