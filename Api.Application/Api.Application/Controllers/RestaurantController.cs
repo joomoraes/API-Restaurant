@@ -246,5 +246,21 @@ namespace Api.Application.Controllers
                 data = list
             });
         }
+
+        [HttpDelete("restaurant/{id}")]
+        public ActionResult Remove(string id)
+        {
+            var restaurant = _restaurantRepository.GetById(id);
+
+            if (restaurant == null)
+                return NotFound();
+
+            (var resultRestaurantRemoved, var resultReviewRemoved) = _restaurantRepository.Remove(id);
+
+            return Ok(new
+            {
+                data = $"total of exclude: {resultRestaurantRemoved} restaurant with {resultReviewRemoved} reviews" 
+            });
+        }
     }
 }
