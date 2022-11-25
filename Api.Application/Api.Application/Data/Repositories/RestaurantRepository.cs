@@ -115,6 +115,7 @@ namespace Api.Application.Data.Repositories
 
             return restaurant;
         }
+
         public void Review(string restaurantId, Review review)
         {
             var document = new ReviewSchema
@@ -175,6 +176,42 @@ namespace Api.Application.Data.Repositories
                 .ForEachAsync(d => restaurant.Add(d.ParseToDomain()));
 
             return restaurant;
+        }
+
+        public async Task<Dictionary<Restaurant, double>> GetTop3_WithLookup()
+        {
+            var ret = new Dictionary<Restaurant, double>();
+
+            var top3 = _review.Aggregate()
+                .Group(_ => _.RestaurantId, g => new { RestaurantId = g.Key, 
+                AverageStars = g.Average(a => a.Starts )})
+                .SortByDescending(_ => _.AverageStars)
+                .Limit(3)
+                .Lookup<RestaurantSchema, RestaurantReviewSchema>("restaurant", "RestaurantId", "Id", "Restaurant")
+                .Lookup<ReviewSchema, RestaurantReviewSchema>("review", "Id", "RestaurantId", "Reviews");
+
+            await top3.ForEachAsync(_ =>
+            {
+                if (_.Restaurant.Any())
+                    return;
+
+                var restaurant = new Restaurant(_.Id, _.Restaurant[0].Name, _.Restaurant[0].Kitchen);
+
+                var address = new Address(
+                    _.Restaurant[0].Address.PublicPlace,
+                    _.Restaurant[0].Address.Number,
+                    _.Restaurant[0].Address.City,
+                    _.Restaurant[0].Address.State,
+                    _.Restaurant[0].Address.ZipCode);
+
+                restaurant.AtributeAddress(address);
+
+                _.Reviews.ForEach(a => restaurant.ReviewInsert(a.ParseToDomain()));
+
+                ret.Add(restaurant, _.AverageStars);
+            });
+
+            return ret;
         }
 
     }
