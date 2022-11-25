@@ -284,5 +284,25 @@ namespace Api.Application.Controllers
                 }); 
 
         }
+
+        [HttpGet("restaurant/top3-lookup")]
+        public async Task<ActionResult> GetTop3Restaurant_WithLookUp()
+        {
+            var top3 = await _restaurantRepository.GetTop3_WithLookup();
+
+            var list = top3.Select(_ => new RestaurantTop3
+            {
+                Id = _.Key.Id,
+                Name = _.Key.Name,
+                Kitchen = (int) _.Key.Kitchen,
+                City = _.Key.Address.City,
+                Stars = (int) _.Value
+            });
+
+            return Ok(new
+            {
+                data = list
+            });
+        }
     }
 }
